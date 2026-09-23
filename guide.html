@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Running a Goal Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --ink:#1A2130; --muted:#5A6477; --rule:#D9DEE6;
+  --code-bg:#EBEEF3; --code-ink:#1F2A3C; --accent:#2E4C9E; --accent-soft:#E2E8F6;
+  --l0:#9FB0D6; --l1:#6F88C4; --l2:#4665B0; --l3:#2E4C9E;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#11151C; --surface:#181D26; --ink:#E3E7EE; --muted:#9AA4B6; --rule:#2A3140;
+    --code-bg:#1D2330; --code-ink:#D5DCE8; --accent:#93AAF0; --accent-soft:#222C45;
+    --l0:#3A4A72; --l1:#4E63A0; --l2:#6A82C8; --l3:#93AAF0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#11151C; --surface:#181D26; --ink:#E3E7EE; --muted:#9AA4B6; --rule:#2A3140;
+  --code-bg:#1D2330; --code-ink:#D5DCE8; --accent:#93AAF0; --accent-soft:#222C45;
+  --l0:#3A4A72; --l1:#4E63A0; --l2:#6A82C8; --l3:#93AAF0;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62;padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:56px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 32px);align-self:start;padding-top:56px;font-size:14px}
+nav.toc p{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+nav.toc a{color:var(--ink);text-decoration:none;display:flex;gap:10px;align-items:baseline;padding:3px 0}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+nav.toc .n{font-family:var(--mono);font-size:12px;color:var(--muted);width:1.4em}
+main{min-width:0;max-width:720px}
+header.top{padding-block:56px 8px}
+.eyebrow{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--accent);margin:0 0 10px}
+h1,h2,h3{font-family:var(--cond);font-weight:600;line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:40px;letter-spacing:-.01em}
+h2{font-size:28px;margin-top:8px}
+h3{font-size:19px;margin-top:28px;margin-bottom:6px}
+p{margin:0 0 14px;max-width:66ch}
+.lede{font-size:18px;color:var(--muted);margin-top:14px}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);color:var(--code-ink);padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.55;background:var(--code-bg);color:var(--code-ink);padding:16px 18px;border-radius:6px;overflow-x:auto;margin:10px 0 18px;white-space:pre}
+pre code{background:none;padding:0;font-size:inherit}
+pre .c{color:var(--muted)}
+pre .k{color:var(--accent);font-weight:500}
+blockquote{margin:10px 0 18px;padding:2px 0 2px 16px;border-left:3px solid var(--rule);color:var(--muted)}
+ul,ol{padding-left:22px;margin:0 0 14px}
+li{margin-bottom:6px;max-width:64ch}
+section{padding-top:48px;margin-top:48px;border-top:1px solid var(--rule)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:14px;color:var(--muted);margin:10px 0 18px}
+.meta b{font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--ink);margin-right:6px}
+.tbl{overflow-x:auto;margin:14px 0 20px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--cond);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td code{white-space:nowrap}
+
+/* prompt-composition ladder */
+.ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:28px 0 8px;align-items:end}
+.rung{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink)}
+.rung .blocks{display:flex;flex-direction:column-reverse;gap:4px}
+.blk{font-family:var(--mono);font-size:11.5px;padding:6px 8px;border-radius:3px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-goal{background:var(--l0);color:var(--ink)}
+.b-main{background:var(--l1)}
+.b-cast{background:var(--l2)}
+.b-guard{background:var(--l3);color:var(--bg)}
+.rung .lbl{font-family:var(--cond);font-weight:600;font-size:15px;margin-top:6px}
+.rung .sub{font-size:13px;color:var(--muted);line-height:1.4}
+.rung:hover .lbl,.rung:focus-visible .lbl{color:var(--accent)}
+.caption{font-size:13px;color:var(--muted)}
+
+.lvl-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.lvl-num{font-family:var(--mono);font-size:13px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:3px}
+.src{font-size:13px;color:var(--muted);margin:-8px 0 18px}
+.ref li{margin-bottom:8px}
+
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:0}
+  nav.toc{display:none}
+  h1{font-size:32px}
+  .ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
+</head>
+<body>
+<style>
+.links{display:flex;flex-wrap:wrap;gap:8px 12px;margin:18px 0 6px;padding:0;list-style:none}
+.links a{display:inline-flex;align-items:baseline;gap:8px;font-size:14px;text-decoration:none;border:1px solid var(--rule);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:4px}
+.links a span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.links a:hover,.links a:focus-visible{border-color:var(--accent);color:var(--accent)}
+.shape{font-family:var(--cond);font-weight:600;font-size:17px;margin:26px 0 6px;color:var(--ink)}
+.shape em{font-style:normal;color:var(--accent)}
+h4{font-family:var(--cond);font-weight:600;font-size:16px;margin:24px 0 6px}
+pre + .src{margin-top:-10px}
+</style>
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#level-0"><span class="n">0</span>Minimal</a></li>
+    <li><a href="#level-1"><span class="n">1</span>Resource pointers</a></li>
+    <li><a href="#level-2"><span class="n">2</span>Goal-cast</a></li>
+    <li><a href="#level-3"><span class="n">3</span>Delegation guard</a></li>
+    <li><a href="#reference"><span class="n">·</span>Short reference</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <p class="eyebrow">/goal · /make-goal</p>
+  <h1>Running a goal campaign</h1>
+  <p class="lede">A goal campaign is Claude Code's <code>/goal</code> loop running against a written contract. The main agent works in iterations. Each iteration it delegates to a few subagents, and it stops when every checkable end state is met.</p>
+  <p>You need Claude Code with <code>/goal</code> and the <code>/make-goal</code> skill, which turns your prompt into the contract. The goal-cast and delegation-guard templates are optional.</p>
+  <ul class="links">
+    <li><a href="https://github.com/carbonscott/make-goal">make-goal <span>skill</span></a></li>
+    <li><a href="https://github.com/carbonscott/goal-campaign/tree/main/templates/goal-cast">goal-cast/ <span>templates</span></a></li>
+    <li><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/delegation-guard.md">delegation-guard.md <span>template</span></a></li>
+    <li><a href="https://github.com/carbonscott/goal-campaign">goal-campaign <span>this guide on GitHub</span></a></li>
+  </ul>
+<pre><code><span class="c"># install /make-goal</span>
+git clone https://github.com/carbonscott/make-goal
+mkdir -p ~/.claude/skills/make-goal
+cp make-goal/SKILL.md ~/.claude/skills/make-goal/SKILL.md</code></pre>
+  <p>This guide climbs four levels. Start at level 0 and add a layer only when the campaign needs it.</p>
+
+  <div class="ladder" role="list" aria-label="What the /make-goal prompt contains at each level">
+    <a class="rung" role="listitem" href="#level-0">
+      <div class="blocks"><div class="blk b-goal">goal + budget</div></div>
+      <span class="lbl">0 · Minimal</span>
+      <span class="sub">fits on one machine and one page</span>
+    </a>
+    <a class="rung" role="listitem" href="#level-1">
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div></div>
+      <span class="lbl">1 · Resources</span>
+      <span class="sub">agents must reach what they can't discover</span>
+    </a>
+    <a class="rung" role="listitem" href="#level-2">
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div></div>
+      <span class="lbl">2 · Goal-cast</span>
+      <span class="sub">results need checking, not just producing</span>
+    </a>
+    <a class="rung" role="listitem" href="#level-3">
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div><div class="blk b-guard">&lt;delegation-guard&gt;</div></div>
+      <span class="lbl">3 · Guard</span>
+      <span class="sub">many agents or long batch jobs at once</span>
+    </a>
+  </div>
+  <p class="caption">What goes into the <code>/make-goal</code> prompt at each level. Each level keeps everything below it.</p>
+</header>
+
+<section id="level-0">
+  <div class="lvl-head"><span class="lvl-num">Level 0</span><h2>Minimal</h2></div>
+  <p>A minimal campaign has three parts:</p>
+  <ol>
+    <li><code>/goal</code></li>
+    <li>a prompt that states the goal</li>
+    <li>a budget as two ranges: <strong>X agents per iteration</strong> (e.g. 2–4) and <strong>Y iterations</strong> (e.g. 3–9)</li>
+  </ol>
+  <p>The budget is given as ranges so the main agent can choose within them as it learns more during the campaign.</p>
+
+  <h3>Stating the goal</h3>
+  <p><code>/make-goal</code> turns what you write into <code>done_when</code>: a list of end states, each with a proof the agent must print. You can state the goal in one of three ways.</p>
+
+  <p class="shape"><em>A.</em> One real goal</p>
+  <p>Say what you want to know or have at the end.</p>
+<pre><code><span class="k">/make-goal</span> compared with the main worktree or branch, this dev-min version is
+minimal, but is it still as performant for write, read, and search, and what
+else?  We didn't really reinvent sqlite, so I would assume it's still good
+(our software only adds some structure).  Having said, I want to see real data
+from real and stressful experiments.  Please work on it until the result is
+ready in @.artifacts.</code></pre>
+  <p class="src">lnb-min-perf-bench — a benchmark across four scales, met in 3 iterations.</p>
+<pre><code><span class="k">/make-goal</span> i have a loose goal of knowing the areas of interests in quantum
+material research.  you have access to @.externals/preprint_servers.json.
+Please work on reseaching these preprints [...].  You should work in
+iterations, and the budget is 3-9 iterations.  You can use 4-8 subagents
+(opus 5.5 at medium) per iteration, and launch them using Workflow tool over
+Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pre>
+  <p class="src">qm-preprint-landscape — a literature survey, met in 3 iterations.</p>
+
+  <p class="shape"><em>B.</em> Several goals</p>
+  <p>List them. Each one becomes its own <code>done_when</code> item or deliverable. Conditions work too (“only if it helps, make a PR”).</p>
+<pre><code><span class="k">/make-goal</span> read /tmp/test-lnb2/.artifacts/handoffs/lnb-log-perf-feedback.md.
+(1) could we create a branch and test the performance in that directory?
+will it actually improve things?  (2) conditionally, if it indeed will
+improve the performance, make a PR. (3) PR reivew and fix loop until it's
+merged.  PR review should be done independently with /review-pr skill
+(4) be honest about the trade-offs too.</code></pre>
+  <p class="src">lnb-log-merge-perf — measure, then conditionally ship, met in 7 iterations.</p>
+<pre><code><span class="k">/make-goal</span> you actually have made it work already.  Please work on this new
+cli design, fully test it on a compute node, make a PR, and independently
+review and fix the PR until the PR is merged.  Workflow Tool over Agent Tool.</code></pre>
+  <p class="src">srsvd-cli-layout — build, test on the cluster, and merge.</p>
+
+  <p class="shape"><em>C.</em> An iteration budget, when “done” is hard to define</p>
+  <p>An open-ended goal like “make it as fast as you can” has no natural finish line. Give it a fixed number of iterations instead, and ask for the best result at the end. This is still checkable: the ledger digest prints <code>iterations N/20</code> every turn, so the evaluator can see when the budget is spent.</p>
+<pre><code>[...] the goal should really be beating the previous best record across.
+[...] Let's give it a finite budget of 5 minute steady state, and meausre how
+much data have been processed through the end-to-end pipeline.
+
+Please run it for 100 iterations.</code></pre>
+  <p class="src">srsvd-ooc-throughput — out-of-core throughput on one GPU.</p>
+  <p>The contract then pairs the iteration count with a result that has to be reported whatever happens. From <code>srsvd-dist-throughput</code> (20 iterations):</p>
+  <blockquote>THE RECORD IS REPORTED EITHER WAY. Name the final champion at each N [...] the factor of DIST5_GB(N_max) over the single-node champion [...]</blockquote>
+  <p>and from <code>srsvd-ooc-throughput</code>:</p>
+  <blockquote>If no candidate ever beat the origin, THAT IS THE FINDING [...]</blockquote>
+  <p>This way a campaign that finds no speedup still ends with a clear answer.</p>
+
+  <h3>Step 1 — write the contract</h3>
+  <p>Run <code>/make-goal</code> in <strong>plan mode</strong> (shift+tab). Plan mode explores the project before drafting, so the contract uses what is already there.</p>
+  <p>State the budget and the delegation tool yourself. If you leave them out, <code>/make-goal</code> falls back to its defaults: 2–5 agents per iteration, 3–9 iterations, and the Agent tool. Say “Workflow tool over Agent tool” if you want to set reasoning effort (“opus at medium”, “xhigh”). The Agent tool can set only the model.</p>
+  <p>You don't have to write the goal in one go. You can discuss the problem first in the same session, then hand the conversation over:</p>
+<pre><code><span class="c">[a long discussion about scaling srsvd-jax across 2–4 nodes, node-local NVMe
+shards, and all-reduce, ending with:]</span>  Let's think about how to properly do this!
+
+<span class="k">/make-goal</span> &lt;main&gt;
+could we turn it into a goal campaign?
+&lt;/main&gt;</code></pre>
+  <p class="src">srsvd-dist-throughput — 2 nodes at 99% scaling efficiency, 2.08× the single-node record, 20 of 20 iterations.</p>
+  <p><code>/make-goal</code> interviews you for anything missing, then shows a draft. Nothing is written until you approve. It writes three files:</p>
+  <ul>
+    <li><code>.goal/&lt;slug&gt;.json</code> is the contract. Each <code>done_when</code> item carries its own proof, for example:
+      <blockquote>Every cited preprint ID is real, proven by printing the final-turn output of <code>python quantum-materials/verify_citations.py</code>, showing [...] <code>cited IDs: N | found in corpus: N | missing: 0</code> with N ≥ 18.</blockquote>
+      <blockquote>THE PR EXISTS WITH THE DECLARED SHAPE: the output of <code>gh pr view &lt;n&gt; --repo carbonscott/srsvd-jax-bench --json number,title,headRefName,baseRefName,state,url</code> is printed showing headRefName dist and baseRefName main [...]</blockquote>
+    </li>
+    <li><code>.goal/&lt;slug&gt;.ledger.json</code> gets one entry per iteration: what was delegated, and what is new.</li>
+    <li><code>.goal/&lt;slug&gt;.claims.json</code> holds the campaign's key claims, each tagged <code>verified</code>, <code>inherited</code> or <code>inferred</code>.</li>
+  </ul>
+  <p>The <code>/goal</code> evaluator reads only conversation text. It cannot open files. So every end state must be something the agent prints.</p>
+
+  <h3>Step 2 — run it</h3>
+  <p>Start from a clean context and paste the command <code>/make-goal</code> printed:</p>
+<pre><code><span class="k">/clear</span>
+<span class="k">/goal</span> work until all done_when conditions are met in @.goal/&lt;slug&gt;.json</code></pre>
+
+  <h3>Step 3 — read the result</h3>
+  <p>Open the claims file and read the <code>inferred</code> and <code>inherited</code> claims first. Those are the ones nobody re-checked.</p>
+  <p>Level 0 is enough for most work. In the campaign archive, 17 of 18 early campaigns used nothing more and met their goal.</p>
+</section>
+
+<section id="level-1">
+  <div class="lvl-head"><span class="lvl-num">Level 1</span><h2>&lt;main&gt; and resource pointers</h2></div>
+
+  <h3>What a resource pointer is</h3>
+  <p>A resource pointer is a file of checked facts about where things are and how to reach them. It covers things like remote hosts, cluster accounts, data locations, service APIs, logs, and the commands that read them. You reference it with <code>@file</code> in the prompt, and every agent can read it when it needs to.</p>
+
+  <h3>Why it helps an autonomous run</h3>
+  <ul>
+    <li><strong>No one is there to ask.</strong> During a campaign you are not in the loop. Any fact the agent lacks becomes a guess, or an iteration spent finding it out.</li>
+    <li><strong>Subagents start cold.</strong> Each subagent begins with no context. A pointer file gives every one of them the same map in a single read.</li>
+    <li><strong>It carries over.</strong> Cluster and data facts rarely change between campaigns. Write them once, check them once, and reuse the file.</li>
+    <li><strong>It keeps the prompt about the goal.</strong> Facts that don't change live in the file. What is specific to this campaign stays in the prompt.</li>
+  </ul>
+
+  <h3>Examples</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>Holds</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td><code>.externals/preprint_servers.json</code></td><td>the preprint servers the agents may query</td><td>qm-preprint-landscape</td></tr>
+      <tr><td><code>.ai/s3df.setup.json</code></td><td>slurm account, partitions, GPU types, how to hold an allocation</td><td>srsvd-dist-throughput, zenodo-osti-bench</td></tr>
+      <tr><td><code>.ai/bridge.setup.json</code>, <code>&lt;slug&gt;.bridge.json</code></td><td>how to reach the remote host through a bridge session</td><td>zenodo-osti-bench, elog-route-expansion</td></tr>
+      <tr><td><code>xpp-resources.json</code></td><td>where DAQ logs, code, and data live, with commands that read them</td><td>xpp-epix100-incident-rev2</td></tr>
+    </tbody>
+  </table></div>
+  <p>An excerpt from <code>s3df.setup.json</code>. Note that it tells agents what <em>not</em> to do, as well as what to do:</p>
+<pre><code>"submission_pattern": "Hold the allocation once with `salloc --no-shell`, then
+  drive steps into it with `srun --jobid=&lt;id&gt;` as many times as needed -- a
+  failed step is another srun, never a re-queue. [...] Do NOT use sbatch, and
+  do not drop and re-request the allocation between retries."</code></pre>
+  <p>Write facts you have checked, and say when you checked them. Agents act on these files without questioning them. So a stale path costs a whole iteration.</p>
+
+  <h3>Using &lt;main&gt;</h3>
+  <p>Once you start adding more blocks, wrap the goal itself in <code>&lt;main&gt;</code> so the parts stay separate.</p>
+<pre><code><span class="k">/make-goal</span> &lt;main&gt;
+
+We did diagnosis based on the resource pointers in @xpp-resources.json and
+produced a report in @xpp-epix100-incident-2026-09-21.html.
+
+Please check out the recent discussion threads in xpp-he-data channel [...]
+
+The goal is to produce an artifact like @xpp-epix100-incident-2026-09-21.html.
+
+The orchestrator agent should have access to @xpp-resources.json, these are
+the resource pointers.
+
+&lt;/main&gt;</code></pre>
+  <p class="src">xpp-epix100-incident-rev2 — an incident report, met.</p>
+<pre><code>You need information about the remote login nodes (which can connect you to
+compute nodes through slurm), and it's in @.ai/s3df.setup.json.</code></pre>
+  <p class="src">From srsvd-dist-throughput.</p>
+  <p>You can also ask the campaign to build its own pointer file as it goes. The single-node throughput campaign asked for one, and the agents kept <code>&lt;slug&gt;.setup.json</code> up to date. They moved each fact from <code>inherited</code> to <code>verified</code> once they had checked it on the node.</p>
+<pre><code>You need to collect setup information you need to run the campaign - remote,
+remote storage (wekafs, nvme, etc), bridge, slurm, data.  Data can be
+artificially generated on disk.</code></pre>
+  <p class="src">From srsvd-ooc-throughput.</p>
+  <p>Two more inputs are worth passing in <code>&lt;main&gt;</code>:</p>
+  <ul>
+    <li>A <strong>handoff doc</strong> from an earlier session. For example, srsvd-dist-merge started with “read .ai/handoffs/merge-dist-harness-to-main.md”.</li>
+    <li>An <strong>earlier contract</strong>, when this campaign continues one. For example, “We have done a good campaign associated with @../runtime-b/.goal/srsvd-ooc-throughput.json.”</li>
+  </ul>
+</section>
+
+<section id="level-2">
+  <div class="lvl-head"><span class="lvl-num">Level 2</span><h2>Goal-cast</h2></div>
+  <p>A goal-cast gives each iteration a fixed shape: named roles, each with a model, an effort level, and a cadence. Paste it after <code>&lt;/main&gt;</code>. Fill in the <code>[slots]</code> and delete any role you don't need.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Cast</th><th>Use when</th><th>Campaigns that used it</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/advisor-worker.goal_cast.md">advisor-worker</a></td><td>general default: plan, do, then attack the result</td><td>zenodo-osti-bench, fix-issues-onboard, elog-search-skill</td></tr>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/implementer-runner.goal_cast.md">implementer-runner</a></td><td>a number is the goal, measured against a champion</td><td>srsvd-ooc-throughput (an earlier JSON version)</td></tr>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/reviewer-fixer.goal_cast.md">reviewer-fixer</a></td><td>a PR must reach a clean review</td><td>srsvd-dist-merge, pr1-review-merge</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Advisor-worker</h3>
+  <p>The shape, trimmed (see the file for the full text):</p>
+<pre><code>&lt;goal-cast&gt;
+&lt;orchestrator&gt;
+You are the orchestrator. Each iteration: think, decompose, delegate,
+integrate, ledger. Every decision is yours — advisors advise [...]
+Prefer the Workflow tool over the Agent tool whenever Workflow is available.
+&lt;/orchestrator&gt;
+
+&lt;advisor name="planner" model="[fable]" effort="[xhigh]"
+         cadence="iteration 1; any iteration that changes direction [...]"&gt;
+Consulted BEFORE a decomposition is committed [...] Run a pre-mortem [...]
+&lt;/advisor&gt;
+
+&lt;advisor name="skeptic" [...] cadence="every iteration that produces a
+         measurement or claim"&gt;
+Consulted AFTER results, BEFORE belief [...] Verdict per claim: BELIEVE, or
+QUARANTINE with the reason.
+&lt;/advisor&gt;
+
+&lt;workers model="[opus]" count="[2-4] per iteration [...]" effort="[xhigh]"&gt;
+Return evidence, not conclusions [...]
+&lt;/workers&gt;
+
+&lt;worker name="cold-reader" [...]&gt;
+Given the deliverable and NOTHING else [...] attempt to use it end to end.
+&lt;/worker&gt;
+
+&lt;discipline&gt;
+- Predict before you measure [...]
+- Quarantine has teeth [...]
+&lt;/discipline&gt;
+&lt;/goal-cast&gt;</code></pre>
+  <p>Advisors count toward the per-iteration budget. So an iteration that brings in the planner and the skeptic has fewer slots left for workers.</p>
+
+  <h3>Implementer-runner: beating a performance record</h3>
+  <p>Implementers write candidate changes. One runner measures every candidate next to the current champion, re-measured in the same iteration. A candidate becomes the new champion only if it wins by more than the noise floor.</p>
+  <p>The single-node srsvd-jax campaign used this cast. You can tune a cast for one campaign without touching the template. Here the user changed the implementer count and added a setup phase after seeing the draft:</p>
+<pre><code>- The orchestrator can spend 1-3 iterations to set up the campaign like
+  generating data for the campaign on nvme.
+- Originally, it's 1 implementer per iteration, but you can have 1-3
+  implementers (opus, xhigh) per iterations in case the change is large (do
+  not change the base goal cast json, but in the campaign specific goal cast
+  json)
+- Use 4 bridge session max to mitigate contention from subagents and main
+  agent.</code></pre>
+  <p class="src">srsvd-ooc-throughput — the champion reached 2.54× the starting throughput, at 94% of the one-GPU read limit.</p>
+
+  <h3>Reviewer-fixer: landing a PR</h3>
+  <p>Each iteration a fresh reviewer reads the PR, fixers close the findings in parallel, and a verifier checks that nothing the tests miss has broken. The prompt can be as short as the goal:</p>
+<pre><code><span class="k">/make-goal</span> &lt;main&gt;
+
+you decide how many PRs, but I want to merge them, since we have identified a
+champion now.
+
+&lt;/main&gt;
+
+&lt;goal-cast&gt;
+<span class="c">[reviewer-fixer, slots filled]</span>
+&lt;/goal-cast&gt;</code></pre>
+  <p class="src">srsvd-dist-merge — 3 iterations took the multi-node benchmark harness to an APPROVE verdict from a fresh reviewer. GitHub won't let an author approve their own PR, so the verdict was posted as a comment. The user then authorized the merge.</p>
+</section>
+
+<section id="level-3">
+  <div class="lvl-head"><span class="lvl-num">Level 3</span><h2>Delegation guard</h2></div>
+  <p>When many agents run at once, or a worker processes a long list, one looping agent can cost many times what the rest cost together. In one real case, one of three sibling agents looped for 1,160 turns, wrote nothing, and cost ~60× what the other two did.</p>
+  <p>Paste <a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/delegation-guard.md"><code>delegation-guard.md</code></a> after the goal-cast. It tells the orchestrator to:</p>
+  <ul>
+    <li><strong>Poll</strong> transcript sizes (not wall-clock time) on a fixed schedule.</li>
+    <li><strong>Question</strong> any agent that is past a size cap or 3× the size of its siblings.</li>
+    <li><strong>Stop</strong> agents that are going in circles.</li>
+    <li><strong>Give</strong> every worker a batch size, so an agent that writes no output shows up as a failure early.</li>
+  </ul>
+  <p>The part that prevents most problems is the batch rule. Every worker gets it:</p>
+<pre><code>"Work in batches of about [12] items. For each batch: read the [12], write
+ results for every id, and append to [output file] before starting the next
+ batch. Never read your whole list before writing anything. [...]"</code></pre>
+  <p>The full level-3 prompt is laid out like this:</p>
+<pre><code><span class="k">/make-goal</span> &lt;main&gt;
+<span class="c">...goal, budget, "Workflow over Agent", @resource pointers...</span>
+&lt;/main&gt;
+
+&lt;goal-cast&gt;
+<span class="c">...a cast from goal-cast/, slots filled...</span>
+&lt;/goal-cast&gt;
+
+&lt;delegation-guard&gt;
+<span class="c">...delegation-guard.md, slots filled...</span>
+&lt;/delegation-guard&gt;</code></pre>
+  <p>Campaigns that used all three blocks:</p>
+  <ul>
+    <li><strong>srsvd-ooc-throughput:</strong> long GPU runs on one node.</li>
+    <li><strong>zenodo-osti-bench:</strong> 32 datasets registered in parallel, met in 6 iterations.</li>
+    <li><strong>elog-route-expansion:</strong> many API routes implemented by 2–4 agents per iteration.</li>
+  </ul>
+</section>
+
+<section id="reference">
+  <h2>Short reference</h2>
+  <ul class="ref">
+    <li>Install <a href="https://github.com/carbonscott/make-goal"><code>/make-goal</code></a>. Run it in plan mode.</li>
+    <li>State one goal, several goals, or an iteration budget with a report that is due whatever happens.</li>
+    <li>State the agent budget and “Workflow over Agent” in the prompt.</li>
+    <li>Approve the draft, then <code>/clear</code> and paste the <code>/goal</code> command.</li>
+    <li>Read <code>inferred</code> and <code>inherited</code> claims first.</li>
+    <li>Add levels only as needed: resource pointers when agents can't reach something, a cast when results need checking, a guard when agents run at scale.</li>
+    <li>Split big work into chained campaigns. For example, the single-node throughput campaign, then the multi-node campaign that built on it, then a merge campaign that landed the result.</li>
+  </ul>
+</section>
+</main>
+</div>
+</body>
+</html>
