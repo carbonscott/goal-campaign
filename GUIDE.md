@@ -11,7 +11,7 @@ few subagents, and it stops when every checkable end state is met.
 ```
 /goal <condition>
 
-while not <condition>:
+while judge(condition, conversation) == "not yet met":
     Claude works another turn
 ```
 
@@ -21,20 +21,32 @@ You write the condition in plain English:
 /goal all tests in tests/ pass and the README documents the new flag
 ```
 
-Normally Claude stops when it decides a task is done. With a goal set, each
-time Claude tries to stop, the condition is checked against the conversation
-so far. If it isn't met, Claude gets feedback naming what is missing, and the
-loop runs again. From a real campaign:
+Normally Claude stops when it decides a task is done. With a goal set, a
+second model decides instead. After each turn, Claude Code sends the
+condition and the conversation so far to a small, fast model (Haiku by
+default). This judge returns one of three verdicts, each with a short reason:
+
+- **Not yet met:** Claude starts another turn and uses the reason as
+  guidance.
+- **Met:** the goal clears and the loop ends.
+- **Impossible:** the goal clears and the reason is recorded.
+
+A real "not yet met" reason, from a campaign:
 
 > Seven of eight done_when conditions are met [...]. The eighth condition
 > [...] is not met.
 
-The loop ends by itself once the condition is met. `/goal clear` stops it
-early.
+The judge does not call tools. It can't open files or run commands, so it
+can only judge what Claude has printed in the conversation. This is why a
+goal campaign prints its progress every turn. The ledger file on disk holds
+the full record, but the judge never reads it. It reads the short ledger
+digest that Claude prints at the end of each turn. Everything printed costs
+the main model output tokens and stays in its context, so the digest is kept
+to one line per iteration.
 
-The check reads only the conversation. It can't run commands or open files.
-So every part of the condition has to be something Claude can show by
-printing it.
+`/goal clear` stops a goal early. If a subagent or background command is
+still running when a turn ends, the judge waits and checks at the end of a
+later turn. Details are in the [Claude Code docs](https://code.claude.com/docs/en/goal).
 
 ## Getting started
 
