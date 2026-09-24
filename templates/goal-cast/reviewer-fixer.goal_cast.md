@@ -9,6 +9,9 @@
      settable only through Workflow. Delegations per fixing iteration follow
      from the count slots: one reviewer plus fixers [1-3] — 2–4; plus one
      verifier in iteration 1 and one in the final iteration.
+     The reviewer's skill="..." slot takes a PR-review skill you already
+     have installed (for example /review-pr); leave it [none] and the
+     reviewer follows the plain process written in its role.
      Not campaign-specific. -->
 
 <goal-cast>
@@ -20,9 +23,9 @@ the PR head branch, ledger, scoreboard. Reviewer and fixers report; you
 decide. Prefer the Workflow tool over the Agent tool.
 
 Bootstrap, iteration 1, before any review:
-(a) Confirm the `/review-pr` skill loads; if absent, install it once here
-    (`git clone https://github.com/carbonscott/review-pr
-    ~/.claude/skills/review-pr`). A reviewer never installs it.
+(a) If the reviewer's skill slot names a review skill, confirm it loads.
+    If it does not, record that in the ledger and use the reviewer's plain
+    process instead. A reviewer never installs anything.
 (b) Record PR number, head branch, base branch, merge-base SHA, starting
     head SHA. Every diff is measured against that merge-base.
 (c) Declare whether the PR has an INVARIANT BEYOND THE TEST SUITE
@@ -58,16 +61,21 @@ PR: it ends with the review posted, the verifier's report committed, and
 the merge command printed for a human.
 </orchestrator>
 
-<worker name="reviewer" model="[opus]" effort="[xhigh]"
+<worker name="reviewer" model="[opus]" effort="[xhigh]" skill="[none]"
         count="exactly 1 per iteration; never dropped, never duplicated"
         cadence="every iteration, first, on the PR's pushed head SHA">
-Run `/review-pr` on the PR you were given, following its process. Two
-changes: (1) do Steps 1–4 and STOP BEFORE STEP 5 — return the drafted
-review (event, every comment with severity prefix, file, line, reason)
-instead of posting; on the round marked final, complete Step 5, post,
-and report the URL. (2) Carry-forward check: for each prior finding you
-are handed, state PRESENT or ABSENT in the current code with the line
-you checked. You are told nothing about what was done; judge the code.
+Review the PR you were given. If your skill slot names a review skill,
+run it and follow its process; otherwise read the full diff against the
+merge-base and the code it touches. Either way, three rules:
+(1) Severity: prefix every comment Nit:, Optional:, Consider: or FYI:
+when it is non-blocking; an unprefixed comment is blocking.
+(2) Draft, don't post: return the drafted review (event APPROVE,
+REQUEST_CHANGES or COMMENT, and every comment with severity, file, line,
+reason) instead of posting it. On the round marked final, post it as a
+review on the PR and report the URL.
+(3) Carry-forward check: for each prior finding you are handed, state
+PRESENT or ABSENT in the current code with the line you checked. You are
+told nothing about what was done; judge the code.
 You review the diff, not the campaign; do not ask for fixer reports, the
 ledger or intent. Report severity, file, line, what is wrong, why it
 matters, and the direction of a fix without writing it. Say what you did

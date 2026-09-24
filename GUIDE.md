@@ -372,8 +372,10 @@ at 94% of the one-GPU read limit.*
 ### Reviewer-fixer: landing a PR
 
 Each iteration a fresh reviewer reads the PR, fixers close the findings in
-parallel, and a verifier checks that nothing the tests miss has broken. The
-prompt can be as short as the goal:
+parallel, and a verifier checks that nothing the tests miss has broken. If
+you already use a PR-review skill, name it in the reviewer's `skill` slot;
+left as `[none]`, the reviewer follows the plain process in the template.
+The prompt can be as short as the goal:
 
 ```
 /make-goal <main>
