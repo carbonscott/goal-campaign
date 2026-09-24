@@ -180,14 +180,6 @@ cp make-goal/SKILL.md ~/.claude/skills/make-goal/SKILL.md</code></pre>
   <blockquote>Seven of eight done_when conditions are met [...]. The eighth condition [...] is not met.</blockquote>
   <p>The loop ends by itself once the condition is met. <code>/goal clear</code> stops it early.</p>
   <p>The check reads only the conversation. It can't run commands or open files. So every part of the condition has to be something Claude can show by printing it.</p>
-  <p>A goal campaign fills in the body of that loop. <code>/make-goal</code> writes the condition as a contract, and each pass through the loop is one iteration:</p>
-<pre><code><span class="k">while not</span> all(done_when):       <span class="c"># includes "at least 3 iterations"</span>
-    plan the next slice of work
-    delegate it to X subagents  <span class="c"># X from the budget, e.g. 2-4</span>
-    integrate what comes back
-    print the ledger digest
-    <span class="k">if</span> iterations == ceiling:   <span class="c"># e.g. 9</span>
-        report what is still unmet, then stop</code></pre>
 </section>
 
 <section id="level-0">

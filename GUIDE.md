@@ -36,19 +36,6 @@ The check reads only the conversation. It can't run commands or open files.
 So every part of the condition has to be something Claude can show by
 printing it.
 
-A goal campaign fills in the body of that loop. `/make-goal` writes the
-condition as a contract, and each pass through the loop is one iteration:
-
-```
-while not all(done_when):       # includes "at least 3 iterations"
-    plan the next slice of work
-    delegate it to X subagents  # X from the budget, e.g. 2-4
-    integrate what comes back
-    print the ledger digest
-    if iterations == ceiling:   # e.g. 9
-        report what is still unmet, then stop
-```
-
 ## Getting started
 
 What you need:
