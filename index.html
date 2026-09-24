@@ -149,17 +149,17 @@ cp make-goal/SKILL.md ~/.claude/skills/make-goal/SKILL.md</code></pre>
       <span class="sub">fits on one machine and one page</span>
     </a>
     <a class="rung" role="listitem" href="#level-1">
-      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div></div>
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">@resources</div></div>
       <span class="lbl">1 · Resources</span>
       <span class="sub">agents must reach what they can't discover</span>
     </a>
     <a class="rung" role="listitem" href="#level-2">
-      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div></div>
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">@resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div></div>
       <span class="lbl">2 · Goal-cast</span>
       <span class="sub">results need checking, not just producing</span>
     </a>
     <a class="rung" role="listitem" href="#level-3">
-      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">&lt;main&gt; @resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div><div class="blk b-guard">&lt;delegation-guard&gt;</div></div>
+      <div class="blocks"><div class="blk b-goal">goal + budget</div><div class="blk b-main">@resources</div><div class="blk b-cast">&lt;goal-cast&gt;</div><div class="blk b-guard">&lt;delegation-guard&gt;</div></div>
       <span class="lbl">3 · Guard</span>
       <span class="sub">many agents or long batch jobs at once</span>
     </a>
@@ -235,7 +235,7 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
 </section>
 
 <section id="level-1">
-  <div class="lvl-head"><span class="lvl-num">Level 1</span><h2>&lt;main&gt; and resource pointers</h2></div>
+  <div class="lvl-head"><span class="lvl-num">Level 1</span><h2>Resource pointers</h2></div>
 
   <h3>What a resource pointer is</h3>
   <p>A resource pointer is a file of checked facts about where things are and how to reach them. It covers things like remote hosts, cluster accounts, data locations, service APIs, logs, and the commands that read them. You reference it with <code>@file</code> in the prompt, and every agent can read it when it needs to.</p>
@@ -300,22 +300,14 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
   <p>All three say when or how each fact was checked, and name the wrong move as well as the right one. An entry like “NOT ANSWERABLE [...] Verified absent” saves an agent from spending an iteration searching for something that isn't there.</p>
   <p>Write facts you have checked, and say when you checked them. Agents act on these files without questioning them. So a stale path costs a whole iteration.</p>
 
-  <h3>Using &lt;main&gt;</h3>
-  <p>Once you start adding more blocks, wrap the goal itself in <code>&lt;main&gt;</code> so the parts stay separate.</p>
-<pre><code><span class="k">/make-goal</span> &lt;main&gt;
-
-We did diagnosis based on the resource pointers in @xpp-resources.json and
+  <h3>Pointing to resources in the prompt</h3>
+  <p>Reference a pointer file with <code>@file</code> anywhere in the prompt, and say what it is for:</p>
+<pre><code>We did diagnosis based on the resource pointers in @xpp-resources.json and
 produced a report in @xpp-epix100-incident-2026-09-21.html.
-
-Please check out the recent discussion threads in xpp-he-data channel [...]
-
-The goal is to produce an artifact like @xpp-epix100-incident-2026-09-21.html.
-
+[...]
 The orchestrator agent should have access to @xpp-resources.json, these are
-the resource pointers.
-
-&lt;/main&gt;</code></pre>
-  <p class="src">xpp-epix100-incident-rev2 — an incident report, met.</p>
+the resource pointers.</code></pre>
+  <p class="src">From xpp-epix100-incident-rev2, an incident report, met.</p>
 <pre><code>You need information about the remote login nodes (which can connect you to
 compute nodes through slurm), and it's in @.ai/s3df.setup.json.</code></pre>
   <p class="src">From srsvd-dist-throughput.</p>
@@ -324,7 +316,7 @@ compute nodes through slurm), and it's in @.ai/s3df.setup.json.</code></pre>
 remote storage (wekafs, nvme, etc), bridge, slurm, data.  Data can be
 artificially generated on disk.</code></pre>
   <p class="src">From srsvd-ooc-throughput.</p>
-  <p>Two more inputs are worth passing in <code>&lt;main&gt;</code>:</p>
+  <p>Two more inputs are worth pointing to in the prompt:</p>
   <ul>
     <li>A <strong>handoff doc</strong> from an earlier session. For example, srsvd-dist-merge started with “read .ai/handoffs/merge-dist-harness-to-main.md”.</li>
     <li>An <strong>earlier contract</strong>, when this campaign continues one. For example, “We have done a good campaign associated with @../runtime-b/.goal/srsvd-ooc-throughput.json.”</li>
@@ -333,7 +325,7 @@ artificially generated on disk.</code></pre>
 
 <section id="level-2">
   <div class="lvl-head"><span class="lvl-num">Level 2</span><h2>Goal-cast</h2></div>
-  <p>A goal-cast gives each iteration a fixed shape: named roles, each with a model, an effort level, and a cadence. Paste it after <code>&lt;/main&gt;</code>. Fill in the <code>[slots]</code> and delete any role you don't need.</p>
+  <p>A goal-cast gives each iteration a fixed shape: named roles, each with a model, an effort level, and a cadence. Paste it after your goal. Fill in the <code>[slots]</code> and delete any role you don't need.</p>
   <div class="tbl"><table>
     <thead><tr><th>Cast</th><th>Use when</th><th>Campaigns that used it</th></tr></thead>
     <tbody>
@@ -432,6 +424,7 @@ champion now.
 &lt;delegation-guard&gt;
 <span class="c">...delegation-guard.md, slots filled...</span>
 &lt;/delegation-guard&gt;</code></pre>
+  <p>The <code>&lt;main&gt;</code> tags are optional. They only make it easier to tell your goal apart from the pasted templates; <code>/make-goal</code> reads the prompt the same way without them.</p>
   <h3>Worked example: maximizing srsvd-jax throughput</h3>
   <p><code>srsvd-ooc-throughput</code> set out to beat the best steady-state throughput of srsvd-jax (a randomized SVD library written in JAX) on one GPU, with a dataset twice the size of host memory. The prompt, with details trimmed:</p>
 <pre><code><span class="k">/make-goal</span>

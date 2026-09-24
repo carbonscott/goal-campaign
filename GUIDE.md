@@ -73,7 +73,7 @@ campaign needs it.
 | Level | You add | Use it when |
 |---|---|---|
 | 0 — minimal | a goal and a budget | the work fits on one machine and one page |
-| 1 — `<main>` + resources | resource pointers: hosts, data, services, prior work | agents must reach things they cannot discover |
+| 1 — resource pointers | resource pointers: hosts, data, services, prior work | agents must reach things they cannot discover |
 | 2 — goal-cast | named roles per iteration | results need checking, not just producing |
 | 3 — delegation guard | a watchdog for subagents | many agents or long batch jobs run at once |
 
@@ -152,7 +152,7 @@ campaigns used nothing more and met their goal.
 
 ---
 
-## Level 1 — `<main>` and resource pointers
+## Level 1 — resource pointers
 
 ### What a resource pointer is
 
@@ -247,27 +247,19 @@ Write facts you have checked, and say when you checked them. Agents act on
 these files without questioning them. So a stale path costs a whole
 iteration.
 
-### Using `<main>`
+### Pointing to resources in the prompt
 
-Once you start adding more blocks, wrap the goal itself in `<main>` so the
-parts stay separate.
+Reference a pointer file with `@file` anywhere in the prompt, and say what it
+is for:
 
 ```
-/make-goal <main>
-
 We did diagnosis based on the resource pointers in @xpp-resources.json and
 produced a report in @xpp-epix100-incident-2026-09-21.html.
-
-Please check out the recent discussion threads in xpp-he-data channel [...]
-
-The goal is to produce an artifact like @xpp-epix100-incident-2026-09-21.html.
-
+[...]
 The orchestrator agent should have access to @xpp-resources.json, these are
 the resource pointers.
-
-</main>
 ```
-*xpp-epix100-incident-rev2: an incident report, met.*
+*From xpp-epix100-incident-rev2, an incident report, met.*
 
 ```
 You need information about the remote login nodes (which can connect you to
@@ -287,7 +279,7 @@ artificially generated on disk.
 ```
 *From srsvd-ooc-throughput.*
 
-Two more inputs are worth passing in `<main>`:
+Two more inputs are worth pointing to in the prompt:
 
 - A **handoff doc** from an earlier session. For example, srsvd-dist-merge
   started with "read .ai/handoffs/merge-dist-harness-to-main.md".
@@ -300,7 +292,7 @@ Two more inputs are worth passing in `<main>`:
 ## Level 2 — goal-cast
 
 A goal-cast gives each iteration a fixed shape: named roles, each with a
-model, an effort level, and a cadence. Paste it after `</main>`. Fill in the
+model, an effort level, and a cadence. Paste it after your goal. Fill in the
 `[slots]` and delete any role you don't need.
 
 | Cast | Use when | Campaigns that used it |
@@ -439,6 +431,10 @@ The full level-3 prompt is laid out like this:
 ...delegation-guard.md, slots filled...
 </delegation-guard>
 ```
+
+The `<main>` tags are optional. They only make it easier to tell your goal
+apart from the pasted templates; `/make-goal` reads the prompt the same way
+without them.
 
 ### Worked example: maximizing srsvd-jax throughput
 
