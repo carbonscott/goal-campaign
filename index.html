@@ -105,6 +105,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shape em{font-style:normal;color:var(--accent)}
 h4{font-family:var(--cond);font-weight:600;font-size:16px;margin:24px 0 6px}
 pre + .src{margin-top:-10px}
+li ol{margin:8px 0 8px}
 figure.chart{margin:18px 0 22px}
 figure.chart img{display:block;width:100%;height:auto;max-width:100%;border:1px solid var(--rule);border-radius:4px;background:#fff}
 figure.chart a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -114,6 +115,7 @@ figure.chart figcaption{font-size:13.5px;line-height:1.5;color:var(--muted);marg
 <nav class="toc" aria-label="Contents">
   <p>Contents</p>
   <ol>
+    <li><a href="#what-goal-does"><span class="n">·</span>What /goal does</a></li>
     <li><a href="#level-0"><span class="n">0</span>Minimal</a></li>
     <li><a href="#level-1"><span class="n">1</span>Resource pointers</a></li>
     <li><a href="#level-2"><span class="n">2</span>Goal-cast</a></li>
@@ -164,6 +166,29 @@ cp make-goal/SKILL.md ~/.claude/skills/make-goal/SKILL.md</code></pre>
   </div>
   <p class="caption">What goes into the <code>/make-goal</code> prompt at each level. Each level keeps everything below it.</p>
 </header>
+
+<section id="what-goal-does">
+  <h2>What <code>/goal</code> does</h2>
+  <p><code>/goal</code> is a built-in Claude Code command that runs Claude in a while loop:</p>
+<pre><code><span class="k">/goal</span> &lt;condition&gt;
+
+<span class="k">while not</span> &lt;condition&gt;:
+    Claude works another turn</code></pre>
+  <p>You write the condition in plain English:</p>
+<pre><code><span class="k">/goal</span> all tests in tests/ pass and the README documents the new flag</code></pre>
+  <p>Normally Claude stops when it decides a task is done. With a goal set, each time Claude tries to stop, the condition is checked against the conversation so far. If it isn't met, Claude gets feedback naming what is missing, and the loop runs again. From a real campaign:</p>
+  <blockquote>Seven of eight done_when conditions are met [...]. The eighth condition [...] is not met.</blockquote>
+  <p>The loop ends by itself once the condition is met. <code>/goal clear</code> stops it early.</p>
+  <p>The check reads only the conversation. It can't run commands or open files. So every part of the condition has to be something Claude can show by printing it.</p>
+  <p>A goal campaign fills in the body of that loop. <code>/make-goal</code> writes the condition as a contract, and each pass through the loop is one iteration:</p>
+<pre><code><span class="k">while not</span> all(done_when):       <span class="c"># includes "at least 3 iterations"</span>
+    plan the next slice of work
+    delegate it to X subagents  <span class="c"># X from the budget, e.g. 2-4</span>
+    integrate what comes back
+    print the ledger digest
+    <span class="k">if</span> iterations == ceiling:   <span class="c"># e.g. 9</span>
+        report what is still unmet, then stop</code></pre>
+</section>
 
 <section id="level-0">
   <div class="lvl-head"><span class="lvl-num">Level 0</span><h2>Minimal</h2></div>
@@ -452,8 +477,12 @@ campaign specifically.
 &lt;/delegation-guard&gt;</code></pre>
   <p>What each part of the prompt does:</p>
   <ul>
-    <li><strong>The goal</strong> is a measured record (“beating the previous best record”), with the measurement defined: data processed in a 5-minute steady-state window.</li>
-    <li><strong>“Please run it for 100 iterations”</strong> is the stopping rule. “As fast as possible” has no natural finish line, so a fixed number of iterations replaces one. The contract paired it with a result that must be reported either way: “If no candidate ever beat the origin, THAT IS THE FINDING.”</li>
+    <li><strong>Two goals in one campaign.</strong> “Beat the previous best record” can't be promised, so the contract turned the prompt into two goals that are within the agent's control:
+      <ol>
+        <li><strong>Run 100 iterations.</strong> This is a <code>done_when</code> item like any other: the printed ledger digest must show <code>iterations N/100</code> with N ≥ 100.</li>
+        <li><strong>Report the best record, whatever it is.</strong> The record is data processed in a 5-minute steady-state window. The contract says: “If no candidate ever beat the origin, THAT IS THE FINDING.”</li>
+      </ol>
+      The first goal does the job of early stopping, written so it can be checked. Every <code>/make-goal</code> contract has an iteration floor like this (3 by default). Here it is set high enough to be the real finish line.</li>
     <li><strong>Resource pointers</strong> are the earlier contract, the method notes, and the instruction to collect a setup file.</li>
     <li><strong>The goal-cast</strong> is an earlier JSON version of implementer-runner. After seeing the draft, the user tuned it with a follow-up message (quoted in Level 2).</li>
     <li><strong>The delegation guard</strong> is pasted in full, because each iteration runs long GPU jobs.</li>
@@ -474,7 +503,7 @@ campaign specifically.
   <h2>Short reference</h2>
   <ul class="ref">
     <li>Install <a href="https://github.com/carbonscott/make-goal"><code>/make-goal</code></a>. Run it in plan mode.</li>
-    <li>State one goal, several goals, or, when “done” is hard to define, a fixed number of iterations with a report that is due either way.</li>
+    <li>State one goal or several. When “done” is hard to define, make a fixed number of iterations one goal, and a report that is due either way another.</li>
     <li>State the agent budget and “Workflow over Agent” in the prompt.</li>
     <li>Approve the draft, then <code>/clear</code> and paste the <code>/goal</code> command.</li>
     <li>Read <code>inferred</code> and <code>inherited</code> claims first.</li>

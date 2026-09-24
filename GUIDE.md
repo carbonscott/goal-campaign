@@ -4,6 +4,53 @@ A goal campaign is Claude Code's `/goal` loop running against a written
 contract. The main agent works in iterations. Each iteration it delegates to a
 few subagents, and it stops when every checkable end state is met.
 
+## What `/goal` does
+
+`/goal` is a built-in Claude Code command that runs Claude in a while loop:
+
+```
+/goal <condition>
+
+while not <condition>:
+    Claude works another turn
+```
+
+You write the condition in plain English:
+
+```
+/goal all tests in tests/ pass and the README documents the new flag
+```
+
+Normally Claude stops when it decides a task is done. With a goal set, each
+time Claude tries to stop, the condition is checked against the conversation
+so far. If it isn't met, Claude gets feedback naming what is missing, and the
+loop runs again. From a real campaign:
+
+> Seven of eight done_when conditions are met [...]. The eighth condition
+> [...] is not met.
+
+The loop ends by itself once the condition is met. `/goal clear` stops it
+early.
+
+The check reads only the conversation. It can't run commands or open files.
+So every part of the condition has to be something Claude can show by
+printing it.
+
+A goal campaign fills in the body of that loop. `/make-goal` writes the
+condition as a contract, and each pass through the loop is one iteration:
+
+```
+while not all(done_when):       # includes "at least 3 iterations"
+    plan the next slice of work
+    delegate it to X subagents  # X from the budget, e.g. 2-4
+    integrate what comes back
+    print the ledger digest
+    if iterations == ceiling:   # e.g. 9
+        report what is still unmet, then stop
+```
+
+## Getting started
+
 What you need:
 
 - Claude Code with `/goal`
@@ -444,13 +491,18 @@ campaign specifically.
 
 What each part of the prompt does:
 
-- **The goal** is a measured record ("beating the previous best record"),
-  with the measurement defined: data processed in a 5-minute steady-state
-  window.
-- **"Please run it for 100 iterations"** is the stopping rule. "As fast as
-  possible" has no natural finish line, so a fixed number of iterations
-  replaces one. The contract paired it with a result that must be reported
-  either way: "If no candidate ever beat the origin, THAT IS THE FINDING."
+- **Two goals in one campaign.** "Beat the previous best record" can't be
+  promised, so the contract turned the prompt into two goals that are within
+  the agent's control:
+  1. **Run 100 iterations.** This is a `done_when` item like any other: the
+     printed ledger digest must show `iterations N/100` with N ≥ 100.
+  2. **Report the best record, whatever it is.** The record is data processed
+     in a 5-minute steady-state window. The contract says: "If no candidate
+     ever beat the origin, THAT IS THE FINDING."
+
+  The first goal does the job of early stopping, written so it can be
+  checked. Every `/make-goal` contract has an iteration floor like this (3
+  by default). Here it is set high enough to be the real finish line.
 - **Resource pointers** are the earlier contract, the method notes, and the
   instruction to collect a setup file.
 - **The goal-cast** is an earlier JSON version of implementer-runner. After
@@ -485,8 +537,8 @@ Other campaigns that used all three blocks:
 
 - Install [`/make-goal`](https://github.com/carbonscott/make-goal). Run it in
   plan mode.
-- State one goal, several goals, or, when "done" is hard to define, a fixed
-  number of iterations with a report that is due either way.
+- State one goal or several. When "done" is hard to define, make a fixed
+  number of iterations one goal, and a report that is due either way another.
 - State the agent budget and "Workflow over Agent" in the prompt.
 - Approve the draft, then `/clear` and paste the `/goal` command.
 - Read `inferred` and `inherited` claims first.
