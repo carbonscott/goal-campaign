@@ -463,6 +463,15 @@ Result: the champion reached 2.54× the starting throughput, at 94% of the
 one-GPU read limit. The scoreboard ends at iteration 21 of the 100 requested,
 so this is the best result reached, not a finished 100-iteration run.
 
+[![Throughput per 300-second run across the srsvd-ooc-throughput campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB](images/srsvd-ooc-throughput-progress.png)](images/srsvd-ooc-throughput-progress.png)
+
+*Every timed 300-second run in the campaign, in the order it ran (grey dots),
+with the running record (green line) and the change behind each new record.
+The shaded band is iterations 4–11, when the machine's own read rate dropped
+and the campaign spent eight iterations tracing it to NUMA page placement.
+One record was withdrawn after it failed to replicate. The chart was drawn
+from the campaign's scoreboard file.*
+
 Other campaigns that used all three blocks:
 
 - **zenodo-osti-bench:** 32 datasets registered in parallel, met in 6

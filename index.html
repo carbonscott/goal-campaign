@@ -105,6 +105,10 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shape em{font-style:normal;color:var(--accent)}
 h4{font-family:var(--cond);font-weight:600;font-size:16px;margin:24px 0 6px}
 pre + .src{margin-top:-10px}
+figure.chart{margin:18px 0 22px}
+figure.chart img{display:block;width:100%;height:auto;max-width:100%;border:1px solid var(--rule);border-radius:4px;background:#fff}
+figure.chart a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+figure.chart figcaption{font-size:13.5px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:70ch}
 </style>
 <div class="wrap">
 <nav class="toc" aria-label="Contents">
@@ -455,6 +459,10 @@ campaign specifically.
     <li><strong>The delegation guard</strong> is pasted in full, because each iteration runs long GPU jobs.</li>
   </ul>
   <p>Result: the champion reached 2.54× the starting throughput, at 94% of the one-GPU read limit. The scoreboard ends at iteration 21 of the 100 requested, so this is the best result reached, not a finished 100-iteration run.</p>
+  <figure class="chart">
+    <a href="images/srsvd-ooc-throughput-progress.png"><img src="images/srsvd-ooc-throughput-progress.png" width="2230" height="1227" alt="Throughput per 300-second run across the srsvd-ooc-throughput campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB"></a>
+    <figcaption>Every timed 300-second run in the campaign, in the order it ran (grey dots), with the running record (green line) and the change behind each new record. The shaded band is iterations 4–11, when the machine's own read rate dropped and the campaign spent eight iterations tracing it to NUMA page placement. One record was withdrawn after it failed to replicate. The chart was drawn from the campaign's scoreboard file. Select the chart to open it full size.</figcaption>
+  </figure>
   <p>Other campaigns that used all three blocks:</p>
   <ul>
     <li><strong>zenodo-osti-bench:</strong> 32 datasets registered in parallel, met in 6 iterations.</li>

@@ -49,6 +49,7 @@ guide explains when each one helps.
 | [`templates/goal-cast/implementer-runner.goal_cast.md`](templates/goal-cast/implementer-runner.goal_cast.md) | cast for beating a measured record |
 | [`templates/goal-cast/reviewer-fixer.goal_cast.md`](templates/goal-cast/reviewer-fixer.goal_cast.md) | cast for driving a PR to a clean review |
 | [`templates/delegation-guard.md`](templates/delegation-guard.md) | watchdog for runaway subagents |
+| [`images/`](images/) | figures used by the guide |
 
 ## License
 
