@@ -222,20 +222,55 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
   </ul>
 
   <h3>Examples</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>File</th><th>Holds</th><th>Used by</th></tr></thead>
-    <tbody>
-      <tr><td><code>.externals/preprint_servers.json</code></td><td>the preprint servers the agents may query</td><td>qm-preprint-landscape</td></tr>
-      <tr><td><code>.ai/s3df.setup.json</code></td><td>slurm account, partitions, GPU types, how to hold an allocation</td><td>srsvd-dist-throughput, zenodo-osti-bench</td></tr>
-      <tr><td><code>.ai/bridge.setup.json</code>, <code>&lt;slug&gt;.bridge.json</code></td><td>how to reach the remote host through a bridge session</td><td>zenodo-osti-bench, elog-route-expansion</td></tr>
-      <tr><td><code>xpp-resources.json</code></td><td>where DAQ logs, code, and data live, with commands that read them</td><td>xpp-epix100-incident-rev2</td></tr>
-    </tbody>
-  </table></div>
-  <p>An excerpt from <code>s3df.setup.json</code>. Note that it tells agents what <em>not</em> to do, as well as what to do:</p>
+  <p>Three real pointer files, trimmed. Each is long, so only a few entries are shown.</p>
+  <h4>Preprint servers</h4>
+  <p><code>.externals/preprint_servers.json</code>, from qm-preprint-landscape. For each server: which API to call, what format it returns, and how often it may be called.</p>
+<pre><code>{
+  "notes": [
+    "Endpoints change. Run a health check (one small request per endpoint)
+     before relying on this file in production.",
+    "Respect each server's terms of use and rate limits; send a descriptive
+     User-Agent with a contact email."
+  ],
+  "servers": [
+    {
+      "id": "arxiv",
+      "access": {
+        "method": "native_api",
+        "search_api": "https://export.arxiv.org/api/query?search_query=all:{query}&amp;start=0&amp;max_results=50",
+        "search_api_format": "Atom XML",
+        "auth_required": false,
+        "rate_limit_note": "Roughly one request every 3 seconds; see API terms of use."
+      },
+      "materials_science_categories": ["cond-mat.mtrl-sci", "cond-mat.soft", "cond-mat.supr-con"]
+    },
+    {
+      "id": "biorxiv",
+      "access": {
+        "rate_limit_note": "No keyword search endpoint; the API lists by date
+          range or DOI. Use Europe PMC or OpenAlex for keyword search."
+      }
+    }
+    [... 20+ more servers ...]
+  ]
+}</code></pre>
+  <h4>Hutch resources</h4>
+  <p><code>xpp-resources.json</code>, from xpp-epix100-incident-rev2. Which command to trust, and which obvious shortcut gives the wrong answer.</p>
+<pre><code>"how_many_events_did_run_N_have": "NOT ANSWERABLE FROM ANY LOG ON THIS
+  HUTCH. Verified absent. Use the eLog (skills.elog_search). [...]",
+
+"find_the_current_experiment": "`get_curr_exp -i xpp` -- verified working
+  standalone, returned xpp102087827 on 2026-09-20. USE THIS, not directory
+  mtimes: `ls -dt [...]/xpp1*` puts xpp101921427 first [...] even though the
+  active experiment was xpp102087827 -- directory mtimes on XPP are
+  misleading."</code></pre>
+  <h4>Cluster facts</h4>
+  <p><code>s3df.setup.json</code>, from srsvd-dist-throughput. How to use the batch system without losing a hard-won allocation.</p>
 <pre><code>"submission_pattern": "Hold the allocation once with `salloc --no-shell`, then
   drive steps into it with `srun --jobid=&lt;id&gt;` as many times as needed -- a
   failed step is another srun, never a re-queue. [...] Do NOT use sbatch, and
   do not drop and re-request the allocation between retries."</code></pre>
+  <p>All three say when or how each fact was checked, and name the wrong move as well as the right one. An entry like “NOT ANSWERABLE [...] Verified absent” saves an agent from spending an iteration searching for something that isn't there.</p>
   <p>Write facts you have checked, and say when you checked them. Agents act on these files without questioning them. So a stale path costs a whole iteration.</p>
 
   <h3>Using &lt;main&gt;</h3>

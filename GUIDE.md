@@ -129,15 +129,61 @@ needs to.
 
 ### Examples
 
-| File | Holds | Used by |
-|---|---|---|
-| `.externals/preprint_servers.json` | the preprint servers the agents may query | qm-preprint-landscape |
-| `.ai/s3df.setup.json` | slurm account, partitions, GPU types, how to hold an allocation | srsvd-dist-throughput, zenodo-osti-bench |
-| `.ai/bridge.setup.json`, `<slug>.bridge.json` | how to reach the remote host through a bridge session | zenodo-osti-bench, elog-route-expansion |
-| `xpp-resources.json` | where DAQ logs, code, and data live, with commands that read them | xpp-epix100-incident-rev2 |
+Three real pointer files, trimmed. Each is long, so only a few entries are
+shown.
 
-An excerpt from `s3df.setup.json`. Note that it tells agents what *not* to do,
-as well as what to do:
+**Preprint servers** (`.externals/preprint_servers.json`, from
+qm-preprint-landscape). For each server: which API to call, what format it
+returns, and how often it may be called.
+
+```json
+{
+  "notes": [
+    "Endpoints change. Run a health check (one small request per endpoint)
+     before relying on this file in production.",
+    "Respect each server's terms of use and rate limits; send a descriptive
+     User-Agent with a contact email."
+  ],
+  "servers": [
+    {
+      "id": "arxiv",
+      "access": {
+        "method": "native_api",
+        "search_api": "https://export.arxiv.org/api/query?search_query=all:{query}&start=0&max_results=50",
+        "search_api_format": "Atom XML",
+        "auth_required": false,
+        "rate_limit_note": "Roughly one request every 3 seconds; see API terms of use."
+      },
+      "materials_science_categories": ["cond-mat.mtrl-sci", "cond-mat.soft", "cond-mat.supr-con"]
+    },
+    {
+      "id": "biorxiv",
+      "access": {
+        "rate_limit_note": "No keyword search endpoint; the API lists by date
+          range or DOI. Use Europe PMC or OpenAlex for keyword search."
+      }
+    }
+    [... 20+ more servers ...]
+  ]
+}
+```
+
+**Hutch resources** (`xpp-resources.json`, from xpp-epix100-incident-rev2).
+Which command to trust, and which obvious shortcut gives the wrong answer.
+
+```json
+"how_many_events_did_run_N_have": "NOT ANSWERABLE FROM ANY LOG ON THIS
+  HUTCH. Verified absent. Use the eLog (skills.elog_search). [...]",
+
+"find_the_current_experiment": "`get_curr_exp -i xpp` -- verified working
+  standalone, returned xpp102087827 on 2026-09-20. USE THIS, not directory
+  mtimes: `ls -dt [...]/xpp1*` puts xpp101921427 first [...] even though the
+  active experiment was xpp102087827 -- directory mtimes on XPP are
+  misleading."
+```
+
+**Cluster facts** (`s3df.setup.json`, from srsvd-dist-throughput). How to use
+the batch system without losing a hard-won allocation.
 
 ```json
 "submission_pattern": "Hold the allocation once with `salloc --no-shell`, then
@@ -145,6 +191,11 @@ as well as what to do:
   failed step is another srun, never a re-queue. [...] Do NOT use sbatch, and
   do not drop and re-request the allocation between retries."
 ```
+
+All three say when or how each fact was checked, and name the wrong move as
+well as the right one. An entry like "NOT ANSWERABLE [...] Verified absent"
+saves an agent from spending an iteration searching for something that isn't
+there.
 
 Write facts you have checked, and say when you checked them. Agents act on
 these files without questioning them. So a stale path costs a whole
