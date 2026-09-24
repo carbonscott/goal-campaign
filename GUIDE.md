@@ -1,8 +1,9 @@
 # Running a goal campaign
 
-A goal campaign is Claude Code's `/goal` loop running against a written
-contract. The main agent works in iterations. Each iteration it delegates to a
-few subagents, and it stops when every checkable end state is met.
+A goal campaign is a written contract that a main agent works through in
+iterations. Each iteration it delegates to a few subagents, and it stops when
+every checkable end state is met. You run it with Claude Code's `/goal` loop,
+or as a plain prompt.
 
 ## What `/goal` does
 
@@ -48,11 +49,33 @@ to one line per iteration.
 still running when a turn ends, the judge waits and checks at the end of a
 later turn. Details are in the [Claude Code docs](https://code.claude.com/docs/en/goal).
 
+### Running without `/goal`
+
+`/goal` only checks whether the work is done. The iterating and the
+delegating come from the contract and the main agent. Every contract that
+`/make-goal` writes has a `run` field that states the loop in plain words. So
+the contract also works as an ordinary prompt, without `/goal` in front:
+
+```
+/clear
+work until all done_when conditions are met in @.goal/<slug>.json
+```
+
+Models can carry the loop by themselves. In 9 of the author's 32 recorded
+runs, the judge checked only once and found the goal already met. By then the
+main agent had run 3–5 iterations with subagents, and no one had sent it a
+message.
+
+What you give up is the second opinion. Without `/goal`, Claude alone decides
+when every end state is met, and it may stop early. If it does, tell it to
+continue. With `/goal`, this happens without you: in 22 of the same 32 runs,
+the judge's first verdict was "not yet met", and Claude started another turn.
+
 ## Getting started
 
 What you need:
 
-- Claude Code with `/goal`
+- Claude Code, with `/goal` (recommended, not required)
 - the [`/make-goal`](https://github.com/carbonscott/make-goal) skill, which
   turns your prompt into the contract
 - optionally, the templates in this repo:
@@ -81,11 +104,10 @@ campaign needs it.
 
 ## Level 0 — minimal
 
-A minimal campaign has three parts:
+A minimal campaign has two parts:
 
-1. `/goal`
-2. a prompt that states the goal
-3. a budget as two ranges: **X agents per iteration** (e.g. 2–4) and
+1. a prompt that states the goal
+2. a budget as two ranges: **X agents per iteration** (e.g. 2–4) and
    **Y iterations** (e.g. 3–9)
 
 The budget is given as ranges so the main agent can choose within them as it
@@ -142,6 +164,8 @@ Start from a clean context and paste the command `/make-goal` printed:
 /clear
 /goal work until all done_when conditions are met in @.goal/<slug>.json
 ```
+
+To run it without `/goal`, see [Running without `/goal`](#running-without-goal).
 
 ### Step 3 — read the result
 

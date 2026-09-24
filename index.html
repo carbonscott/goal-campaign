@@ -128,8 +128,8 @@ figure.chart figcaption{font-size:13.5px;line-height:1.5;color:var(--muted);marg
 <header class="top">
   <p class="eyebrow">/goal · /make-goal</p>
   <h1>Running a goal campaign</h1>
-  <p class="lede">A goal campaign is Claude Code's <code>/goal</code> loop running against a written contract. The main agent works in iterations. Each iteration it delegates to a few subagents, and it stops when every checkable end state is met.</p>
-  <p>You need Claude Code with <code>/goal</code> and the <code>/make-goal</code> skill, which turns your prompt into the contract. The goal-cast and delegation-guard templates are optional.</p>
+  <p class="lede">A goal campaign is a written contract that a main agent works through in iterations. Each iteration it delegates to a few subagents, and it stops when every checkable end state is met. You run it with Claude Code's <code>/goal</code> loop, or as a plain prompt.</p>
+  <p>You need Claude Code and the <code>/make-goal</code> skill, which turns your prompt into the contract. <code>/goal</code> is recommended, not required. The goal-cast and delegation-guard templates are optional.</p>
   <ul class="links">
     <li><a href="https://github.com/carbonscott/make-goal">make-goal <span>skill</span></a></li>
     <li><a href="https://github.com/carbonscott/goal-campaign/tree/main/templates/goal-cast">goal-cast/ <span>templates</span></a></li>
@@ -186,13 +186,19 @@ cp make-goal/SKILL.md ~/.claude/skills/make-goal/SKILL.md</code></pre>
   <blockquote>Seven of eight done_when conditions are met [...]. The eighth condition [...] is not met.</blockquote>
   <p>The judge does not call tools. It can't open files or run commands, so it can only judge what Claude has printed in the conversation. This is why a goal campaign prints its progress every turn. The ledger file on disk holds the full record, but the judge never reads it. It reads the short ledger digest that Claude prints at the end of each turn. Everything printed costs the main model output tokens and stays in its context, so the digest is kept to one line per iteration.</p>
   <p><code>/goal clear</code> stops a goal early. If a subagent or background command is still running when a turn ends, the judge waits and checks at the end of a later turn. Details are in the <a href="https://code.claude.com/docs/en/goal">Claude Code docs</a>.</p>
+
+  <h3 id="without-goal">Running without <code>/goal</code></h3>
+  <p><code>/goal</code> only checks whether the work is done. The iterating and the delegating come from the contract and the main agent. Every contract that <code>/make-goal</code> writes has a <code>run</code> field that states the loop in plain words. So the contract also works as an ordinary prompt, without <code>/goal</code> in front:</p>
+<pre><code><span class="k">/clear</span>
+work until all done_when conditions are met in @.goal/&lt;slug&gt;.json</code></pre>
+  <p>Models can carry the loop by themselves. In 9 of the author's 32 recorded runs, the judge checked only once and found the goal already met. By then the main agent had run 3–5 iterations with subagents, and no one had sent it a message.</p>
+  <p>What you give up is the second opinion. Without <code>/goal</code>, Claude alone decides when every end state is met, and it may stop early. If it does, tell it to continue. With <code>/goal</code>, this happens without you: in 22 of the same 32 runs, the judge's first verdict was “not yet met”, and Claude started another turn.</p>
 </section>
 
 <section id="level-0">
   <div class="lvl-head"><span class="lvl-num">Level 0</span><h2>Minimal</h2></div>
-  <p>A minimal campaign has three parts:</p>
+  <p>A minimal campaign has two parts:</p>
   <ol>
-    <li><code>/goal</code></li>
     <li>a prompt that states the goal</li>
     <li>a budget as two ranges: <strong>X agents per iteration</strong> (e.g. 2–4) and <strong>Y iterations</strong> (e.g. 3–9)</li>
   </ol>
@@ -228,6 +234,7 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
   <p>Start from a clean context and paste the command <code>/make-goal</code> printed:</p>
 <pre><code><span class="k">/clear</span>
 <span class="k">/goal</span> work until all done_when conditions are met in @.goal/&lt;slug&gt;.json</code></pre>
+  <p>To run it without <code>/goal</code>, see <a href="#without-goal">Running without <code>/goal</code></a>.</p>
 
   <h3>Step 3 — read the result</h3>
   <p>Open the claims file and read the <code>inferred</code> and <code>inherited</code> claims first. Those are the ones nobody re-checked.</p>

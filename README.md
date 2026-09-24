@@ -2,11 +2,11 @@
 
 A guide and templates for running goal campaigns with Claude Code.
 
-A goal campaign is Claude Code's `/goal` loop running against a written
-contract. The main agent works in iterations. Each iteration it delegates to a
-few subagents, and it stops when every checkable end state is met. The
-contract is written by the [`/make-goal`](https://github.com/carbonscott/make-goal)
-skill.
+A goal campaign is a written contract that a main agent works through in
+iterations. Each iteration it delegates to a few subagents, and it stops when
+every checkable end state is met. The contract is written by the
+[`/make-goal`](https://github.com/carbonscott/make-goal) skill. You run it
+with Claude Code's `/goal` loop, or as a plain prompt.
 
 **Read the guide:** [carbonscott.github.io/goal-campaign](https://carbonscott.github.io/goal-campaign/)
 (also available as [`GUIDE.md`](GUIDE.md)).
