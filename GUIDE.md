@@ -100,7 +100,8 @@ State the budget and the delegation tool yourself. If you leave them out,
 `/make-goal` falls back to its defaults: 2–5 agents per iteration, 3–9
 iterations, and the Agent tool.
 
-A real level-0 prompt (`qm-preprint-landscape`, met in 3 iterations):
+A real level-0 prompt, from a literature survey that met its goal in 3
+iterations:
 
 ```
 /make-goal i have a loose goal of knowing the areas of interests in quantum
@@ -147,8 +148,8 @@ Start from a clean context and paste the command `/make-goal` printed:
 Open the claims file and read the `inferred` and `inherited` claims first.
 Those are the ones nobody re-checked.
 
-Level 0 is enough for most work. In the campaign archive, 17 of 18 early
-campaigns used nothing more and met their goal.
+Level 0 is enough for most work. Of the author's first 18 campaigns, 17 used
+nothing more and met their goal.
 
 ---
 
@@ -178,8 +179,8 @@ needs to.
 Three real pointer files, trimmed. Each is long, so only a few entries are
 shown.
 
-**Preprint servers** (`.externals/preprint_servers.json`, from
-qm-preprint-landscape). For each server: which API to call, what format it
+**Preprint servers** (`.externals/preprint_servers.json`, from the literature
+survey in Level 0). For each server: which API to call, what format it
 returns, and how often it may be called.
 
 ```json
@@ -214,7 +215,8 @@ returns, and how often it may be called.
 }
 ```
 
-**Hutch resources** (`xpp-resources.json`, from xpp-epix100-incident-rev2).
+**Beamline resources** (`xpp-resources.json`, from an investigation of a
+detector incident).
 Which command to trust, and which obvious shortcut gives the wrong answer.
 
 ```json
@@ -228,7 +230,7 @@ Which command to trust, and which obvious shortcut gives the wrong answer.
   misleading."
 ```
 
-**Cluster facts** (`s3df.setup.json`, from srsvd-dist-throughput). How to use
+**Cluster facts** (`s3df.setup.json`, from the srsvd-jax campaigns). How to use
 the batch system without losing a hard-won allocation.
 
 ```json
@@ -259,13 +261,13 @@ produced a report in @xpp-epix100-incident-2026-09-21.html.
 The orchestrator agent should have access to @xpp-resources.json, these are
 the resource pointers.
 ```
-*From xpp-epix100-incident-rev2, an incident report, met.*
+*From the detector incident investigation, which met its goal.*
 
 ```
 You need information about the remote login nodes (which can connect you to
 compute nodes through slurm), and it's in @.ai/s3df.setup.json.
 ```
-*From srsvd-dist-throughput.*
+*From the two-node srsvd-jax campaign.*
 
 You can also ask the campaign to build its own pointer file as it goes. The
 single-node throughput campaign asked for one, and the agents kept
@@ -277,12 +279,14 @@ You need to collect setup information you need to run the campaign - remote,
 remote storage (wekafs, nvme, etc), bridge, slurm, data.  Data can be
 artificially generated on disk.
 ```
-*From srsvd-ooc-throughput.*
+*From the single-node srsvd-jax campaign (the worked example in Level 3).
+"Bridge" is [cc-bridge](https://github.com/carbonscott/cc-bridge), the
+author's tool for working on remote hosts over SSH.*
 
 Two more inputs are worth pointing to in the prompt:
 
-- A **handoff doc** from an earlier session. For example, srsvd-dist-merge
-  started with "read .ai/handoffs/merge-dist-harness-to-main.md".
+- A **handoff doc** from an earlier session. For example, "read
+  .ai/handoffs/merge-dist-harness-to-main.md".
 - An **earlier contract**, when this campaign continues one. For example,
   "We have done a good campaign associated with
   @../runtime-b/.goal/srsvd-ooc-throughput.json."
@@ -295,11 +299,11 @@ A goal-cast gives each iteration a fixed shape: named roles, each with a
 model, an effort level, and a cadence. Paste it after your goal. Fill in the
 `[slots]` and delete any role you don't need.
 
-| Cast | Use when | Campaigns that used it |
+| Cast | Use when | Example in this guide |
 |---|---|---|
-| [advisor-worker](templates/goal-cast/advisor-worker.goal_cast.md) | general default: plan, do, then attack the result | zenodo-osti-bench, fix-issues-onboard, elog-search-skill |
-| [implementer-runner](templates/goal-cast/implementer-runner.goal_cast.md) | a number is the goal, measured against a champion | srsvd-ooc-throughput (an earlier JSON version) |
-| [reviewer-fixer](templates/goal-cast/reviewer-fixer.goal_cast.md) | a PR must reach a clean review | srsvd-dist-merge, pr1-review-merge |
+| [advisor-worker](templates/goal-cast/advisor-worker.goal_cast.md) | general default: plan, do, then attack the result | the trimmed cast below |
+| [implementer-runner](templates/goal-cast/implementer-runner.goal_cast.md) | a number is the goal, measured against a champion | the srsvd-jax campaign (Level 3) |
+| [reviewer-fixer](templates/goal-cast/reviewer-fixer.goal_cast.md) | a PR must reach a clean review | landing a PR, below |
 
 ### Advisor-worker
 
@@ -362,7 +366,7 @@ count and added a setup phase after seeing the draft:
 - Use 4 bridge session max to mitigate contention from subagents and main
   agent.
 ```
-*srsvd-ooc-throughput. The champion reached 2.54× the starting throughput,
+*From the srsvd-jax campaign in Level 3. The champion reached 2.54× the starting throughput,
 at 94% of the one-GPU read limit.*
 
 ### Reviewer-fixer: landing a PR
@@ -383,10 +387,10 @@ champion now.
 [reviewer-fixer, slots filled]
 </goal-cast>
 ```
-*srsvd-dist-merge: 3 iterations took the multi-node benchmark harness to an
-APPROVE verdict from a fresh reviewer. GitHub won't let an author approve
-their own PR, so the verdict was posted as a comment. The user then
-authorized the merge.*
+*From a campaign that merged the two-node srsvd-jax benchmark code. In 3
+iterations it took the change to an APPROVE verdict from a fresh reviewer.
+GitHub won't let an author approve their own PR, so the verdict was posted as
+a comment. The user then authorized the merge.*
 
 ---
 
@@ -438,7 +442,7 @@ without them.
 
 ### Worked example: maximizing srsvd-jax throughput
 
-`srsvd-ooc-throughput` set out to beat the best steady-state throughput of
+This campaign set out to beat the best steady-state throughput of
 srsvd-jax (a randomized SVD library written in JAX) on one GPU, with a
 dataset twice the size of host memory. The prompt, with details trimmed:
 
@@ -510,7 +514,7 @@ Result: the champion reached 2.54× the starting throughput, at 94% of the
 one-GPU read limit. The scoreboard ends at iteration 21 of the 100 requested,
 so this is the best result reached, not a finished 100-iteration run.
 
-[![Throughput per 300-second run across the srsvd-ooc-throughput campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB](images/srsvd-ooc-throughput-progress.png)](images/srsvd-ooc-throughput-progress.png)
+[![Throughput per 300-second run across the srsvd-jax campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB](images/srsvd-ooc-throughput-progress.png)](images/srsvd-ooc-throughput-progress.png)
 
 *Every timed 300-second run in the campaign, in the order it ran (grey dots),
 with the running record (green line) and the change behind each new record.
@@ -519,12 +523,9 @@ and the campaign spent eight iterations tracing it to NUMA page placement.
 One record was withdrawn after it failed to replicate. The chart was drawn
 from the campaign's scoreboard file.*
 
-Other campaigns that used all three blocks:
-
-- **zenodo-osti-bench:** 32 datasets registered in parallel, met in 6
-  iterations.
-- **elog-route-expansion:** many API routes implemented by 2–4 agents per
-  iteration.
+All three blocks together have also paid off for registering 32 public
+datasets in parallel, and for adding many API routes with 2–4 agents per
+iteration.
 
 ---
 

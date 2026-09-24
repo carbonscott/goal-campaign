@@ -208,7 +208,7 @@ Please work on reseaching these preprints [...].  You should work in
 iterations, and the budget is 3-9 iterations.  You can use 4-8 subagents
 (opus 5.5 at medium) per iteration, and launch them using Workflow tool over
 Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pre>
-  <p class="src">qm-preprint-landscape, 2026-09-23 — met in 3 iterations.</p>
+  <p class="src">From a literature survey that met its goal in 3 iterations.</p>
   <p>Why “Workflow tool over Agent tool”: the Agent tool can set only the model. Reasoning effort (“at medium”, “xhigh”) can be set only through Workflow.</p>
   <p><code>/make-goal</code> interviews you for anything missing, then shows a draft. Nothing is written until you approve. It writes three files:</p>
   <ul>
@@ -231,7 +231,7 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
 
   <h3>Step 3 — read the result</h3>
   <p>Open the claims file and read the <code>inferred</code> and <code>inherited</code> claims first. Those are the ones nobody re-checked.</p>
-  <p>Level 0 is enough for most work. In the campaign archive, 17 of 18 early campaigns used nothing more and met their goal.</p>
+  <p>Level 0 is enough for most work. Of the author's first 18 campaigns, 17 used nothing more and met their goal.</p>
 </section>
 
 <section id="level-1">
@@ -251,7 +251,7 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
   <h3>Examples</h3>
   <p>Three real pointer files, trimmed. Each is long, so only a few entries are shown.</p>
   <h4>Preprint servers</h4>
-  <p><code>.externals/preprint_servers.json</code>, from qm-preprint-landscape. For each server: which API to call, what format it returns, and how often it may be called.</p>
+  <p><code>.externals/preprint_servers.json</code>, from the literature survey in Level 0. For each server: which API to call, what format it returns, and how often it may be called.</p>
 <pre><code>{
   "notes": [
     "Endpoints change. Run a health check (one small request per endpoint)
@@ -281,8 +281,8 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
     [... 20+ more servers ...]
   ]
 }</code></pre>
-  <h4>Hutch resources</h4>
-  <p><code>xpp-resources.json</code>, from xpp-epix100-incident-rev2. Which command to trust, and which obvious shortcut gives the wrong answer.</p>
+  <h4>Beamline resources</h4>
+  <p><code>xpp-resources.json</code>, from an investigation of a detector incident. Which command to trust, and which obvious shortcut gives the wrong answer.</p>
 <pre><code>"how_many_events_did_run_N_have": "NOT ANSWERABLE FROM ANY LOG ON THIS
   HUTCH. Verified absent. Use the eLog (skills.elog_search). [...]",
 
@@ -292,7 +292,7 @@ Agent tool.  The whole exploratory happens inside @quantum-materials/</code></pr
   active experiment was xpp102087827 -- directory mtimes on XPP are
   misleading."</code></pre>
   <h4>Cluster facts</h4>
-  <p><code>s3df.setup.json</code>, from srsvd-dist-throughput. How to use the batch system without losing a hard-won allocation.</p>
+  <p><code>s3df.setup.json</code>, from the srsvd-jax campaigns. How to use the batch system without losing a hard-won allocation.</p>
 <pre><code>"submission_pattern": "Hold the allocation once with `salloc --no-shell`, then
   drive steps into it with `srun --jobid=&lt;id&gt;` as many times as needed -- a
   failed step is another srun, never a re-queue. [...] Do NOT use sbatch, and
@@ -307,18 +307,18 @@ produced a report in @xpp-epix100-incident-2026-09-21.html.
 [...]
 The orchestrator agent should have access to @xpp-resources.json, these are
 the resource pointers.</code></pre>
-  <p class="src">From xpp-epix100-incident-rev2, an incident report, met.</p>
+  <p class="src">From the detector incident investigation, which met its goal.</p>
 <pre><code>You need information about the remote login nodes (which can connect you to
 compute nodes through slurm), and it's in @.ai/s3df.setup.json.</code></pre>
-  <p class="src">From srsvd-dist-throughput.</p>
+  <p class="src">From the two-node srsvd-jax campaign.</p>
   <p>You can also ask the campaign to build its own pointer file as it goes. The single-node throughput campaign asked for one, and the agents kept <code>&lt;slug&gt;.setup.json</code> up to date. They moved each fact from <code>inherited</code> to <code>verified</code> once they had checked it on the node.</p>
 <pre><code>You need to collect setup information you need to run the campaign - remote,
 remote storage (wekafs, nvme, etc), bridge, slurm, data.  Data can be
 artificially generated on disk.</code></pre>
-  <p class="src">From srsvd-ooc-throughput.</p>
+  <p class="src">From the single-node srsvd-jax campaign (the worked example in Level 3). “Bridge” is <a href="https://github.com/carbonscott/cc-bridge">cc-bridge</a>, the author's tool for working on remote hosts over SSH.</p>
   <p>Two more inputs are worth pointing to in the prompt:</p>
   <ul>
-    <li>A <strong>handoff doc</strong> from an earlier session. For example, srsvd-dist-merge started with “read .ai/handoffs/merge-dist-harness-to-main.md”.</li>
+    <li>A <strong>handoff doc</strong> from an earlier session. For example, “read .ai/handoffs/merge-dist-harness-to-main.md”.</li>
     <li>An <strong>earlier contract</strong>, when this campaign continues one. For example, “We have done a good campaign associated with @../runtime-b/.goal/srsvd-ooc-throughput.json.”</li>
   </ul>
 </section>
@@ -327,15 +327,15 @@ artificially generated on disk.</code></pre>
   <div class="lvl-head"><span class="lvl-num">Level 2</span><h2>Goal-cast</h2></div>
   <p>A goal-cast gives each iteration a fixed shape: named roles, each with a model, an effort level, and a cadence. Paste it after your goal. Fill in the <code>[slots]</code> and delete any role you don't need.</p>
   <div class="tbl"><table>
-    <thead><tr><th>Cast</th><th>Use when</th><th>Campaigns that used it</th></tr></thead>
+    <thead><tr><th>Cast</th><th>Use when</th><th>Example in this guide</th></tr></thead>
     <tbody>
-      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/advisor-worker.goal_cast.md">advisor-worker</a></td><td>general default: plan, do, then attack the result</td><td>zenodo-osti-bench, fix-issues-onboard, elog-search-skill</td></tr>
-      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/implementer-runner.goal_cast.md">implementer-runner</a></td><td>a number is the goal, measured against a champion</td><td>srsvd-ooc-throughput (an earlier JSON version)</td></tr>
-      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/reviewer-fixer.goal_cast.md">reviewer-fixer</a></td><td>a PR must reach a clean review</td><td>srsvd-dist-merge, pr1-review-merge</td></tr>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/advisor-worker.goal_cast.md">advisor-worker</a></td><td>general default: plan, do, then attack the result</td><td><a href="#advisor-worker">the trimmed cast below</a></td></tr>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/implementer-runner.goal_cast.md">implementer-runner</a></td><td>a number is the goal, measured against a champion</td><td><a href="#worked-example">the srsvd-jax campaign (Level 3)</a></td></tr>
+      <tr><td><a href="https://github.com/carbonscott/goal-campaign/blob/main/templates/goal-cast/reviewer-fixer.goal_cast.md">reviewer-fixer</a></td><td>a PR must reach a clean review</td><td><a href="#reviewer-fixer">landing a PR, below</a></td></tr>
     </tbody>
   </table></div>
 
-  <h3>Advisor-worker</h3>
+  <h3 id="advisor-worker">Advisor-worker</h3>
   <p>The shape, trimmed (see the file for the full text):</p>
 <pre><code>&lt;goal-cast&gt;
 &lt;orchestrator&gt;
@@ -381,9 +381,9 @@ Given the deliverable and NOTHING else [...] attempt to use it end to end.
   json)
 - Use 4 bridge session max to mitigate contention from subagents and main
   agent.</code></pre>
-  <p class="src">srsvd-ooc-throughput — the champion reached 2.54× the starting throughput, at 94% of the one-GPU read limit.</p>
+  <p class="src">From the srsvd-jax campaign in Level 3. The champion reached 2.54× the starting throughput, at 94% of the one-GPU read limit.</p>
 
-  <h3>Reviewer-fixer: landing a PR</h3>
+  <h3 id="reviewer-fixer">Reviewer-fixer: landing a PR</h3>
   <p>Each iteration a fresh reviewer reads the PR, fixers close the findings in parallel, and a verifier checks that nothing the tests miss has broken. The prompt can be as short as the goal:</p>
 <pre><code><span class="k">/make-goal</span> &lt;main&gt;
 
@@ -395,7 +395,7 @@ champion now.
 &lt;goal-cast&gt;
 <span class="c">[reviewer-fixer, slots filled]</span>
 &lt;/goal-cast&gt;</code></pre>
-  <p class="src">srsvd-dist-merge — 3 iterations took the multi-node benchmark harness to an APPROVE verdict from a fresh reviewer. GitHub won't let an author approve their own PR, so the verdict was posted as a comment. The user then authorized the merge.</p>
+  <p class="src">From a campaign that merged the two-node srsvd-jax benchmark code. In 3 iterations it took the change to an APPROVE verdict from a fresh reviewer. GitHub won't let an author approve their own PR, so the verdict was posted as a comment. The user then authorized the merge.</p>
 </section>
 
 <section id="level-3">
@@ -425,8 +425,8 @@ champion now.
 <span class="c">...delegation-guard.md, slots filled...</span>
 &lt;/delegation-guard&gt;</code></pre>
   <p>The <code>&lt;main&gt;</code> tags are optional. They only make it easier to tell your goal apart from the pasted templates; <code>/make-goal</code> reads the prompt the same way without them.</p>
-  <h3>Worked example: maximizing srsvd-jax throughput</h3>
-  <p><code>srsvd-ooc-throughput</code> set out to beat the best steady-state throughput of srsvd-jax (a randomized SVD library written in JAX) on one GPU, with a dataset twice the size of host memory. The prompt, with details trimmed:</p>
+  <h3 id="worked-example">Worked example: maximizing srsvd-jax throughput</h3>
+  <p>This campaign set out to beat the best steady-state throughput of srsvd-jax (a randomized SVD library written in JAX) on one GPU, with a dataset twice the size of host memory. The prompt, with details trimmed:</p>
 <pre><code><span class="k">/make-goal</span>
 
 we have done a lot of work to improve the performance of srsvd-jax (right
@@ -480,14 +480,10 @@ campaign specifically.
   </ul>
   <p>Result: the champion reached 2.54× the starting throughput, at 94% of the one-GPU read limit. The scoreboard ends at iteration 21 of the 100 requested, so this is the best result reached, not a finished 100-iteration run.</p>
   <figure class="chart">
-    <a href="images/srsvd-ooc-throughput-progress.png"><img src="images/srsvd-ooc-throughput-progress.png" width="2230" height="1227" alt="Throughput per 300-second run across the srsvd-ooc-throughput campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB"></a>
+    <a href="images/srsvd-ooc-throughput-progress.png"><img src="images/srsvd-ooc-throughput-progress.png" width="2230" height="1227" alt="Throughput per 300-second run across the srsvd-jax campaign: every measured run in order, with the running record rising from 4,069 GB to 10,326 GB"></a>
     <figcaption>Every timed 300-second run in the campaign, in the order it ran (grey dots), with the running record (green line) and the change behind each new record. The shaded band is iterations 4–11, when the machine's own read rate dropped and the campaign spent eight iterations tracing it to NUMA page placement. One record was withdrawn after it failed to replicate. The chart was drawn from the campaign's scoreboard file. Select the chart to open it full size.</figcaption>
   </figure>
-  <p>Other campaigns that used all three blocks:</p>
-  <ul>
-    <li><strong>zenodo-osti-bench:</strong> 32 datasets registered in parallel, met in 6 iterations.</li>
-    <li><strong>elog-route-expansion:</strong> many API routes implemented by 2–4 agents per iteration.</li>
-  </ul>
+  <p>All three blocks together have also paid off for registering 32 public datasets in parallel, and for adding many API routes with 2–4 agents per iteration.</p>
 </section>
 
 <section id="reference">
