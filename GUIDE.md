@@ -45,12 +45,16 @@ A minimal campaign has three parts:
 The budget is given as ranges so the main agent can choose within them as it
 learns more during the campaign.
 
-### Stating the goal
+### Step 1 — write the contract
 
-`/make-goal` turns what you write into `done_when`: a list of end states, each
-with a proof the agent must print. You can state the goal in one of three ways.
+Run `/make-goal` in **plan mode** (shift+tab). Plan mode explores the project
+before drafting, so the contract uses what is already there.
 
-**One real goal.** Say what you want to know or have at the end.
+State the budget and the delegation tool yourself. If you leave them out,
+`/make-goal` falls back to its defaults: 2–5 agents per iteration, 3–9
+iterations, and the Agent tool.
+
+A real level-0 prompt (`qm-preprint-landscape`, met in 3 iterations):
 
 ```
 /make-goal i have a loose goal of knowing the areas of interests in quantum
@@ -60,94 +64,19 @@ iterations, and the budget is 3-9 iterations.  You can use 4-8 subagents
 (opus 5.5 at medium) per iteration, and launch them using Workflow tool over
 Agent tool.  The whole exploratory happens inside @quantum-materials/
 ```
-*qm-preprint-landscape: a literature survey, met in 3 iterations.*
 
-**Several goals.** List them. Each one becomes its own `done_when` item or
-deliverable. Conditions work too ("only if it helps, make a PR").
-
-```
-/make-goal read /tmp/test-lnb2/.artifacts/handoffs/lnb-log-perf-feedback.md.
-(1) could we create a branch and test the performance in that directory?
-will it actually improve things?  (2) conditionally, if it indeed will
-improve the performance, make a PR. (3) PR reivew and fix loop until it's
-merged.  PR review should be done independently with /review-pr skill
-(4) be honest about the trade-offs too.
-```
-*lnb-log-merge-perf: measure, then conditionally ship, met in 7 iterations.*
-
-```
-/make-goal you actually have made it work already.  Please work on this new
-cli design, fully test it on a compute node, make a PR, and independently
-review and fix the PR until the PR is merged.  Workflow Tool over Agent Tool.
-```
-*srsvd-cli-layout: build, test on the cluster, and merge.*
-
-**An iteration budget, when "done" is hard to define.** An open-ended goal
-like "make it as fast as you can" has no natural finish line. Give it a fixed
-number of iterations instead, and ask for the best result at the end. This is
-still checkable: the ledger digest prints `iterations N/20` every turn, so the
-evaluator can see when the budget is spent.
-
-```
-[...] the goal should really be beating the previous best record across.
-[...] Let's give it a finite budget of 5 minute steady state, and meausre how
-much data have been processed through the end-to-end pipeline.
-
-Please run it for 100 iterations.
-```
-*srsvd-ooc-throughput: out-of-core throughput on one GPU.*
-
-The contract then pairs the iteration count with a result that has to be
-reported whatever happens. From `srsvd-dist-throughput` (20 iterations):
-
-> THE RECORD IS REPORTED EITHER WAY. Name the final champion at each N [...]
-> the factor of DIST5_GB(N_max) over the single-node champion [...]
-
-and from `srsvd-ooc-throughput`:
-
-> If no candidate ever beat the origin, THAT IS THE FINDING [...]
-
-This way a campaign that finds no speedup still ends with a clear answer.
-
-### Step 1 — write the contract
-
-Run `/make-goal` in **plan mode** (shift+tab). Plan mode explores the project
-before drafting, so the contract uses what is already there.
-
-State the budget and the delegation tool yourself. If you leave them out,
-`/make-goal` falls back to its defaults: 2–5 agents per iteration, 3–9
-iterations, and the Agent tool. Say "Workflow tool over Agent tool" if you
-want to set reasoning effort ("opus at medium", "xhigh"). The Agent tool can
-set only the model.
-
-You don't have to write the goal in one go. You can discuss the problem first
-in the same session, then hand the conversation over:
-
-```
-[a long discussion about scaling srsvd-jax across 2–4 nodes, node-local NVMe
-shards, and all-reduce, ending with:]  Let's think about how to properly do this!
-
-/make-goal <main>
-could we turn it into a goal campaign?
-</main>
-```
-*srsvd-dist-throughput: 2 nodes at 99% scaling efficiency, 2.08× the
-single-node record, 20 of 20 iterations.*
+Why "Workflow tool over Agent tool": the Agent tool can set only the model.
+Reasoning effort ("at medium", "xhigh") can be set only through Workflow.
 
 `/make-goal` interviews you for anything missing, then shows a draft. Nothing
 is written until you approve. It writes three files:
 
-- `.goal/<slug>.json` is the contract. Each `done_when` item carries its own
-  proof, for example:
+- `.goal/<slug>.json` is the contract. Its key part is `done_when`, a list of
+  end states. Each one carries its own proof. From the example above:
 
   > Every cited preprint ID is real, proven by printing the final-turn output
   > of `python quantum-materials/verify_citations.py`, showing [...]
   > `cited IDs: N | found in corpus: N | missing: 0` with N ≥ 18.
-
-  > THE PR EXISTS WITH THE DECLARED SHAPE: the output of `gh pr view <n>
-  > --repo carbonscott/srsvd-jax-bench --json number,title,headRefName,
-  > baseRefName,state,url` is printed showing headRefName dist and
-  > baseRefName main [...]
 
 - `.goal/<slug>.ledger.json` gets one entry per iteration: what was
   delegated, and what is new.
@@ -155,7 +84,8 @@ is written until you approve. It writes three files:
   `verified`, `inherited` or `inferred`.
 
 The `/goal` evaluator reads only conversation text. It cannot open files. So
-every end state must be something the agent prints.
+every end state must be something the agent prints. The ledger digest printed
+each turn is what makes your iteration range enforceable.
 
 ### Step 2 — run it
 
@@ -413,9 +343,77 @@ The full level-3 prompt is laid out like this:
 </delegation-guard>
 ```
 
-Campaigns that used all three blocks:
+### Worked example: maximizing srsvd-jax throughput
 
-- **srsvd-ooc-throughput:** long GPU runs on one node.
+`srsvd-ooc-throughput` set out to beat the best steady-state throughput of
+srsvd-jax (a randomized SVD library written in JAX) on one GPU, with a
+dataset twice the size of host memory. The prompt, with details trimmed:
+
+```
+/make-goal
+
+we have done a lot of work to improve the performance of srsvd-jax (right
+now, codebase at @work/srsvd-jax at the whole-job branch, which was a result
+of running the @.goal/srsvd-whole-job.json campaign).  [...]  I wrote down my
+lessons in @.ai/research/performance-optimization-method.json.  [...]
+
+you could easily get some gpu node (called ada node) allocation [...].  you
+should be able to get even exclusive node (full memory, full CPU, and full
+GPU, the whole node) easily, and I suggest you do that unless the node
+becomes super busy.
+
+You need to collect setup information you need to run the campaign - remote,
+remote storage (wekafs, nvme, etc), bridge, slurm, data.  Data can be
+artificially generated on disk.
+
+SRSVD-JAX uses JAX heavily, so you might want to do some specific deep dive
+into the JAX repo [...] before you even plan what to do.
+
+The specific scenario I want to optimize is the out of core scenario, where
+data are much larger than not only the GPU memory on a single GPU card, but
+the host memory too.  We should consider using one synthetic data set which
+is 2X host memory.
+
+[...] the goal should really be beating the previous best record across.
+[...] We should really measure a steady state throughput (excluding cold
+start like compilation, for example).  Let's give it a finite budget of 5
+minute steady state, and meausre how much data have been processed through
+the end-to-end pipeline.
+
+Please run it for 100 iterations.
+
+In each iteration, please follow @.goal/base.goal_cast.json.  Actually, leave
+this base goal cast file alone, also create your own goal cast file for this
+campaign specifically.
+
+<delegation-guard>
+[... delegation-guard.md, slots filled ...]
+</delegation-guard>
+```
+
+What each part of the prompt does:
+
+- **The goal** is a measured record ("beating the previous best record"),
+  with the measurement defined: data processed in a 5-minute steady-state
+  window.
+- **"Please run it for 100 iterations"** is the stopping rule. "As fast as
+  possible" has no natural finish line, so a fixed number of iterations
+  replaces one. The contract paired it with a result that must be reported
+  either way: "If no candidate ever beat the origin, THAT IS THE FINDING."
+- **Resource pointers** are the earlier contract, the method notes, and the
+  instruction to collect a setup file.
+- **The goal-cast** is an earlier JSON version of implementer-runner. After
+  seeing the draft, the user tuned it with a follow-up message (quoted in
+  Level 2).
+- **The delegation guard** is pasted in full, because each iteration runs
+  long GPU jobs.
+
+Result: the champion reached 2.54× the starting throughput, at 94% of the
+one-GPU read limit. The scoreboard ends at iteration 21 of the 100 requested,
+so this is the best result reached, not a finished 100-iteration run.
+
+Other campaigns that used all three blocks:
+
 - **zenodo-osti-bench:** 32 datasets registered in parallel, met in 6
   iterations.
 - **elog-route-expansion:** many API routes implemented by 2–4 agents per
@@ -427,8 +425,8 @@ Campaigns that used all three blocks:
 
 - Install [`/make-goal`](https://github.com/carbonscott/make-goal). Run it in
   plan mode.
-- State one goal, several goals, or an iteration budget with a report that is
-  due whatever happens.
+- State one goal, several goals, or, when "done" is hard to define, a fixed
+  number of iterations with a report that is due either way.
 - State the agent budget and "Workflow over Agent" in the prompt.
 - Approve the draft, then `/clear` and paste the `/goal` command.
 - Read `inferred` and `inherited` claims first.
