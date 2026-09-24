@@ -53,16 +53,6 @@ with a proof the agent must print. You can state the goal in one of three ways.
 **One real goal.** Say what you want to know or have at the end.
 
 ```
-/make-goal compared with the main worktree or branch, this dev-min version is
-minimal, but is it still as performant for write, read, and search, and what
-else?  We didn't really reinvent sqlite, so I would assume it's still good
-(our software only adds some structure).  Having said, I want to see real data
-from real and stressful experiments.  Please work on it until the result is
-ready in @.artifacts.
-```
-*lnb-min-perf-bench: a benchmark across four scales, met in 3 iterations.*
-
-```
 /make-goal i have a loose goal of knowing the areas of interests in quantum
 material research.  you have access to @.externals/preprint_servers.json.
 Please work on reseaching these preprints [...].  You should work in
